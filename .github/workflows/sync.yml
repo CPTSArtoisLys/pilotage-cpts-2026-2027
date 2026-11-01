@@ -29,7 +29,7 @@ jobs:
         env:
           NC_USER: ${{ secrets.NC_USER }}
           NC_APP_PASSWORD: ${{ secrets.NC_APP_PASSWORD }}
-          NC_ROOT: /Projets/Bilan annuel 2026-2027
+          NC_ROOT: /Projets/Bilan annuel ACI 2026-2027
       - name: Republier le site
         run: gh api -X POST "repos/${{ github.repository }}/pages/builds" || true
         env:
