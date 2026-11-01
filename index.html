@@ -1,0 +1,737 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Pilotage ACI Artois Lys</title>
+<meta name="robots" content="noindex,nofollow"><script src="config.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: en-tête, onglets de missions, filtres, carte de synthèse (anneau + 4 tuiles), barre d'outils, cartes par mission et sous-axe, tiroir de saisie avec dépôt de pièces. */
+:root{
+  --bg:#eef1fb; --surface:#ffffff; --surface-2:#f1f4fc; --ink:#17234a; --ink-2:#62708f; --line:#dde3f3;
+  --accent:#4a7fe0; --accent-ink:#ffffff; --accent-soft:#e2ebfc; --navy:#102a6b; --navy-ink:#ffffff;
+  --m1:#4a7fe0; --m2:#25b2bb; --m3:#d6a500; --m4:#58ad62; --m5:#8a6fdc; --m6:#e0708c;
+  --st-atteint:#1f9d5c; --st-atteint-bg:#dcf4e6; --st-voie:#3f74da; --st-voie-bg:#e0eafc;
+  --st-surv:#b9740a; --st-surv-bg:#fbeacb; --st-compl:#5d6a8a; --st-compl-bg:#e6eaf4; --st-sans:#7b86a2; --st-sans-bg:#e9ecf5;
+  --fv:#7a5a00; --fv-bg:#fdf0c4; --bad:#c0392b;
+  --shadow:0 1px 2px rgba(23,35,74,.06),0 6px 18px rgba(23,35,74,.07);
+  --font:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1430; --surface:#18204a; --surface-2:#1f2858; --ink:#e8ecfb; --ink-2:#a2aed0; --line:#2b3668;
+  --accent:#7ea4f2; --accent-ink:#0b1334; --accent-soft:#22305f; --navy:#7ea4f2; --navy-ink:#0b1334;
+  --st-atteint:#55d08b; --st-atteint-bg:#17382b; --st-voie:#8db0f6; --st-voie-bg:#1f3066;
+  --st-surv:#efb85a; --st-surv-bg:#3b2f14; --st-compl:#aab5d6; --st-compl-bg:#262f5c; --st-sans:#98a3c4; --st-sans-bg:#222a55;
+  --fv:#f1d66a; --fv-bg:#3a3213; --bad:#ef7a6c; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1430; --surface:#18204a; --surface-2:#1f2858; --ink:#e8ecfb; --ink-2:#a2aed0; --line:#2b3668;
+  --accent:#7ea4f2; --accent-ink:#0b1334; --accent-soft:#22305f; --navy:#7ea4f2; --navy-ink:#0b1334;
+  --st-atteint:#55d08b; --st-atteint-bg:#17382b; --st-voie:#8db0f6; --st-voie-bg:#1f3066;
+  --st-surv:#efb85a; --st-surv-bg:#3b2f14; --st-compl:#aab5d6; --st-compl-bg:#262f5c; --st-sans:#98a3c4; --st-sans-bg:#222a55;
+  --fv:#f1d66a; --fv-bg:#3a3213; --bad:#ef7a6c; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:500 14px/1.45 var(--font);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:14px 56px}
+h1,h2,h3,h4,p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+/* en-tête */
+.head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{width:48px;height:48px;border-radius:14px;background:var(--surface);box-shadow:var(--shadow);display:grid;place-items:center;font-weight:800;color:var(--accent);font-size:17px;letter-spacing:-.02em}
+.head .t{flex:1;min-width:220px}
+.head h1{font-size:20px;font-weight:800;line-height:1.15}
+.head .st{color:var(--ink-2);font-size:13px;margin-top:2px}
+.saved{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2)}
+.saved i{width:8px;height:8px;border-radius:50%;background:var(--st-atteint)}
+.saved.busy i{background:var(--st-surv)}.saved.err i{background:var(--bad)}.saved.ro i{background:var(--st-sans)}
+.yearpill{display:inline-flex;gap:2px;background:var(--surface);border-radius:99px;padding:4px;box-shadow:var(--shadow)}
+.yearpill span{padding:8px 16px;border-radius:99px;font-weight:700;color:var(--ink-2)}
+.yearpill span.on{background:var(--accent);color:var(--accent-ink)}
+/* onglets missions */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.tab{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-weight:700;white-space:nowrap}
+.tab .dot{width:11px;height:11px;border-radius:4px;background:var(--mc,var(--accent))}
+.tab .n{color:var(--ink-2);font-weight:700;font-size:13px}
+.tab:hover{border-color:var(--accent)}
+.tab.on{background:var(--navy);border-color:var(--navy);color:var(--navy-ink)}
+.tab.on .n{color:inherit;opacity:.85}
+/* niveaux et cases */
+.seg{display:flex;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:5px;width:fit-content;max-width:100%;overflow-x:auto}
+.seg button{border:0;background:transparent;border-radius:99px;padding:7px 16px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+.seg button .n{font-size:12px;margin-left:5px;opacity:.8}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.checks{display:flex;flex-wrap:wrap;gap:8px 26px;padding:4px 4px}
+.checks label{display:inline-flex;align-items:center;gap:9px;font-weight:700;color:var(--ink-2);cursor:pointer}
+.checks input{width:20px;height:20px;accent-color:var(--accent)}
+/* synthèse */
+.sum{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:18px;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.15fr);gap:18px 22px;align-items:center}
+.ring{position:relative;width:104px;height:104px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.facts{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-start}
+.facts div{max-width:150px;font-size:13px;color:var(--ink-2);line-height:1.3}
+.facts b{color:var(--ink);font-weight:800;font-size:14px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border:0;text-align:left;background:var(--surface-2);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;outline:2px solid transparent;outline-offset:-2px}
+.tile:hover{outline-color:var(--accent)}
+.tile.on{outline-color:var(--accent);background:var(--accent-soft)}
+.tile b{font-size:28px;font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums}
+.tile span{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);font-weight:700}
+.tile i{width:8px;height:8px;border-radius:50%}
+.note-sm{grid-column:1/-1;font-size:12.5px;color:var(--ink-2)}
+/* barre d'outils */
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.search{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:0 14px;box-shadow:var(--shadow)}
+.search svg{flex:0 0 auto;color:var(--ink-2)}
+.search input{border:0;background:transparent;padding:13px 0;width:100%;outline:none}
+.search:focus-within{border-color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 16px;font-weight:800;display:inline-flex;align-items:center;gap:8px;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:6px 11px;border-radius:10px;font-size:13px;box-shadow:none}
+.btn.ghost{box-shadow:none;background:transparent}
+.btn.danger{color:var(--bad)}
+a.btn,a.tag{text-decoration:none}
+a.btn{color:var(--ink)}
+a.btn.pri{color:var(--accent-ink)}
+a.tag.plx-l{background:var(--accent);color:var(--accent-ink);font-weight:800}
+.cf a{color:var(--accent);font-weight:800;text-decoration:none}
+.cf a:hover{text-decoration:underline}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.activef{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent);border:0;border-radius:99px;padding:6px 12px;font-weight:800;font-size:13px}
+/* missions et cartes */
+.mh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:8px;padding-left:12px;border-left:5px solid var(--mc);border-radius:3px}
+.mh h2{font-size:21px;font-weight:800}
+.mh span{color:var(--ink-2);font-size:13px}
+.sub{font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:14px 2px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.card{position:relative;background:var(--surface);border-radius:20px;box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:10px;cursor:pointer;border:2px solid transparent;min-width:0}
+.card:hover{border-color:var(--accent-soft)}
+.card:focus-visible{border-color:var(--accent)}
+.card.drag{border-color:var(--accent);background:var(--accent-soft)}
+.card .ct{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h4{font-size:15px;font-weight:800;line-height:1.3;min-width:0}
+.badge{flex:0 0 auto;border-radius:99px;padding:3px 11px;font-size:12px;font-weight:800;white-space:nowrap}
+.b-atteint{background:var(--st-atteint-bg);color:var(--st-atteint)}.b-bonne_voie{background:var(--st-voie-bg);color:var(--st-voie)}
+.b-surveiller{background:var(--st-surv-bg);color:var(--st-surv)}.b-completer{background:var(--st-compl-bg);color:var(--st-compl)}.b-sans_mesure{background:var(--st-sans-bg);color:var(--st-sans)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--accent);border:1px solid transparent}
+.tag.fv{background:var(--fv-bg);color:var(--fv)}
+.tag.todo{background:transparent;border:1px dashed var(--ink-2);color:var(--ink-2)}
+.tag.ok{background:var(--st-atteint-bg);color:var(--st-atteint)}
+.tag.cite{background:var(--surface-2);color:var(--ink-2)}
+.tag.prov{background:transparent;border:1px dashed var(--st-surv);color:var(--st-surv)}
+.val{font-size:26px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
+.val.txt{font-size:15px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.val.none{color:var(--ink-2)}
+.obj{font-size:13px;color:var(--ink-2);font-weight:600}
+.pbar{height:8px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:5px;background:var(--mc,var(--accent))}
+.prov-t{color:var(--st-surv);font-weight:700}
+.cf{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:4px;font-size:12.5px;color:var(--ink-2)}
+/* tableau */
+.tbox{overflow-x:auto;background:var(--surface);border-radius:20px;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:820px}
+th{text-align:left;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);padding:12px 14px;background:var(--surface-2)}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+tr.row{cursor:pointer}tr.row:hover td{background:var(--accent-soft)}
+tr.gr td{background:var(--surface-2);font-weight:800;padding:9px 14px}
+td.ref{white-space:nowrap;color:var(--ink-2);font-weight:700}
+.empty{padding:34px 20px;text-align:center;color:var(--ink-2);background:var(--surface);border-radius:20px;box-shadow:var(--shadow)}
+.foot{font-size:12.5px;color:var(--ink-2);display:grid;gap:4px;padding:0 4px}
+/* tiroir */
+.veil{position:fixed;inset:0;background:rgba(10,18,48,.5);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100vw);background:var(--bg);z-index:21;display:flex;flex-direction:column;box-shadow:-10px 0 34px rgba(0,0,0,.28);padding-top:env(safe-area-inset-top,0px)}
+.dhead{background:var(--surface);padding:16px max(16px,env(safe-area-inset-right,0px)) 14px 18px;border-top:6px solid var(--mc,var(--accent));display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.dhead .k{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2)}
+.dhead h2{font-size:17px;font-weight:800;line-height:1.3;margin-top:3px}
+.dhead .tags{margin-top:8px}
+.dbody{overflow-y:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 16px 18px;display:flex;flex-direction:column;gap:14px;flex:1}
+.sec{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+.sec h3{font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:800;display:inline-flex;gap:8px;align-items:center}
+.chip i{width:10px;height:10px;border-radius:50%}
+.chip[aria-pressed="true"]{border-color:currentColor}
+.chip:disabled{cursor:not-allowed;opacity:.6}
+.c-atteint{color:var(--st-atteint)}.c-atteint i{background:var(--st-atteint)}
+.c-bonne_voie{color:var(--st-voie)}.c-bonne_voie i{background:var(--st-voie)}
+.c-surveiller{color:var(--st-surv)}.c-surveiller i{background:var(--st-surv)}
+.c-completer{color:var(--st-compl)}.c-completer i{background:var(--st-compl)}
+.c-sans_mesure{color:var(--st-sans)}.c-sans_mesure i{background:var(--st-sans)}
+.hint{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--ink-2);min-width:0}
+.form .full{grid-column:1/-1}
+.form input[type=text],.form input[type=number],.form select,.form textarea,.sec textarea,.sec select,.sec input[type=text]{border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:9px 11px;width:100%;min-width:0;color:var(--ink)}
+.form textarea,.sec textarea{min-height:76px;resize:vertical}
+.chk{flex-direction:row!important;align-items:center;gap:9px!important;color:var(--ink)!important;font-size:13.5px!important}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.plx{background:var(--accent-soft);border-radius:14px;padding:12px 14px;display:grid;gap:6px;justify-items:start;margin-bottom:10px}
+.plx span{font-size:13px;color:var(--ink-2)}
+.dz{border:2px dashed var(--line);border-radius:16px;padding:22px 14px;text-align:center;background:var(--surface-2);display:grid;gap:6px;justify-items:center;cursor:pointer}
+.dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-soft)}
+.dz b{font-size:15px}
+.dz small{color:var(--ink-2)}
+.pend{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.pend li{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:7px 10px;font-weight:700;font-size:13px}
+.up2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.plist{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:8px}
+.plist li{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:8px 10px;background:var(--surface)}
+.thumb{width:48px;height:48px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:12px;color:var(--ink-2);overflow:hidden;flex:0 0 auto}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.plist .pi{min-width:0;flex:1;display:flex;flex-direction:column}
+.plist a{color:var(--accent);font-weight:800;overflow-wrap:anywhere}
+.plist .meta{font-size:12px;color:var(--ink-2)}
+.jl{list-style:none;margin:12px 0 0;padding:0}
+.jl li{border-left:3px solid var(--line);padding:0 0 12px 14px;position:relative;font-size:13.5px}
+.jl li::before{content:"";position:absolute;left:-6px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.jl li.piece::before{background:var(--st-atteint)}.jl li.suivi::before{background:var(--st-surv)}
+.jl .meta{font-size:12px;color:var(--ink-2)}
+.dfoot{background:var(--surface);border-top:1px solid var(--line);padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.msg{font-size:13px;font-weight:700}.msg.err{color:var(--bad)}.msg.good{color:var(--st-atteint)}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:900px){.sum{grid-template-columns:auto minmax(0,1fr)}.tiles{grid-column:1/-1}}
+@media (max-width:520px){.sum{grid-template-columns:1fr;justify-items:start}.form,.up2{grid-template-columns:1fr}.head h1{font-size:18px}.yearpill span{padding:7px 12px}}
+@media (prefers-reduced-motion:no-preference){.pbar i,.ring circle{transition:all .4s}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="logo" aria-hidden="true">AL</div>
+    <div class="t">
+      <h1>Suivi des indicateurs</h1>
+      <div class="st">CPTS Artois Lys · Avenant 3 à l'ACI · objectifs de la 4e année</div>
+    </div>
+    <a class="btn pri" id="plx-root" href="#" target="_blank" rel="noopener">Dossier Plexus · Bilan annuel 2026-2027</a>
+    <span class="saved" id="saved" role="status"><i></i><span>Chargement…</span></span>
+    <span class="saved" id="syncst" role="status" title=""><i></i><span>Plexus…</span></span>
+    <a class="btn sm" id="btn-sync" href="#" target="_blank" rel="noopener" title="Lancer la synchronisation avec Plexus maintenant">Synchroniser</a>
+    <button class="btn sm" id="btn-edit" type="button" title="Réservé aux personnes autorisées à modifier le suivi" hidden>Mode édition</button>
+    <button class="btn sm" id="btn-logout" type="button" title="Se déconnecter du dépôt de données" hidden>Changer de jeton</button>
+    <div class="yearpill" aria-label="Période suivie"><span class="on">Année 5 · 15/09/2026 → 14/09/2027</span></div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Missions"></nav>
+
+  <div class="seg" id="seg-niveau" role="group" aria-label="Niveau de définition"></div>
+
+  <div class="checks">
+    <label><input type="checkbox" id="c-fv"> Financement variable</label>
+    <label><input type="checkbox" id="c-np"> Sans pièce justificative</label>
+  </div>
+
+  <section class="sum" id="sum" aria-label="Synthèse">
+    <div class="empty" style="grid-column:1/-1;box-shadow:none">Chargement des indicateurs…</div>
+  </section>
+
+  <div class="bar">
+    <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Rechercher un indicateur" aria-label="Rechercher un indicateur"></label>
+    <span id="activef"></span>
+    <div class="seg" id="seg-view" role="group" aria-label="Affichage"><button type="button" data-view="cartes" class="on">Cartes</button><button type="button" data-view="tableau">Tableau</button></div>
+    <button class="btn" id="btn-export" type="button">Exporter</button>
+    <button class="btn pri" id="btn-new" type="button">+ Indicateur</button>
+  </div>
+
+  <main id="main"><div class="empty">Chargement…</div></main>
+
+  <div class="foot">
+    <span>Cliquez sur un indicateur pour saisir son résultat et référencer ses pièces justificatives, qui restent stockées dans Plexus Santé. Chaque indicateur renvoie directement au sous-dossier correspondant du projet « Bilan annuel 2026-2027 ».</span>
+    <span>Le partage se règle depuis le menu Partager de la page : une personne en lecture seule voit statuts, liens vers les pièces et journal, sans pouvoir les modifier. Les fichiers eux-mêmes ne s'ouvrent que pour les personnes ayant accès à Plexus.</span>
+  </div>
+</div>
+
+<div id="overlay" hidden>
+  <div class="veil" id="veil"></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="d-title" id="drawer">
+    <div class="dhead">
+      <div style="min-width:0"><div class="k" id="d-k"></div><h2 id="d-title"></h2><div class="tags" id="d-tags"></div></div>
+      <button class="btn sm" id="d-close" type="button">Fermer</button>
+    </div>
+    <div class="dbody">
+      <div class="sec" id="s-new" hidden>
+        <h3>Nouvel indicateur</h3>
+        <div class="form">
+          <label class="full">Intitulé<input id="n-titre" type="text" placeholder="ex. Nombre de réunions avec les pharmaciens"></label>
+          <label>Mission<select id="n-axe"></select></label>
+          <label>Niveau<select id="n-niveau"><option>Local</option><option>National</option></select></label>
+          <label>Thème (sous-axe)<input id="n-sous" type="text" placeholder="ex. Soins non programmés"></label>
+          <label>Objectif<input id="n-obj" type="text" placeholder="ex. 4 réunions"></label>
+          <label class="chk full"><input id="n-fv" type="checkbox" checked> Pris en compte pour le financement variable</label>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3>Où en est l'indicateur ?</h3>
+        <div class="chips" id="chips"></div>
+        <div class="hint" id="chip-hint"></div>
+      </div>
+
+      <div class="sec">
+        <h3>Résultat</h3>
+        <div class="form">
+          <label>Valeur constatée<input id="i-valeur" type="number" step="any" inputmode="decimal" placeholder="ex. 42"></label>
+          <label>Valeur cible<input id="i-cible" type="number" step="any" inputmode="decimal" placeholder="ex. 60"></label>
+          <label class="full">Résultat repris dans le tableau remis<input id="i-resultat" type="text" placeholder="ex. 42 patients orientés sur 60 attendus"></label>
+          <label class="full">Constat, source, réserve<textarea id="i-note" placeholder="D'où viennent les chiffres, quelle période, qu'est-ce qui reste à confirmer…"></textarea></label>
+          <label class="chk full"><input id="i-just" type="checkbox"> Justificatif déjà classé dans Plexus</label>
+          <label class="chk full"><input id="i-verifie" type="checkbox"> Statut vérifié par la coordination</label>
+        </div>
+      </div>
+
+      <div class="sec" id="s-pieces">
+        <h3><span>Pièces justificatives</span><span id="p-count"></span></h3>
+        <ul class="plist" id="p-list"></ul>
+        <div class="plx" id="p-plx" style="margin:0 0 10px">
+          <b>Justificatifs : dossier Plexus de cette ligne</b>
+          <span>Les justificatifs sont déposés et consultés dans Plexus (connexion Plexus Santé). Les fichiers ajoutés dans le dossier apparaissent ici après la prochaine synchronisation.</span>
+          <a class="btn pri sm" id="p-plx-a" href="#" target="_blank" rel="noopener" style="margin-top:6px;display:inline-block">Ouvrir le dossier Plexus pour déposer ou consulter</a>
+        </div>
+        <div id="p-up">
+          <div class="plx">
+            <b>Référencer un justificatif déjà déposé dans Plexus.</b>
+            <span>Les fichiers eux-mêmes restent dans Plexus : ne saisissez ici aucun nom de personne.</span>
+            <span id="p-dest"></span>
+          </div>
+          <div class="up2">
+            <select id="p-type" aria-label="Nature de la pièce">
+              <option>Preuve chiffrée (extraction, export)</option><option>Compte rendu de réunion</option>
+              <option>Feuille d'émargement</option><option>Affiche, support de communication</option>
+              <option>Courrier ou mail</option><option>Enquête, questionnaire</option><option>Autre</option>
+            </select>
+            <input id="p-label" type="text" placeholder="Libellé (ex. Doctolib SNP, mars 2026)" aria-label="Libellé de la pièce">
+          </div>
+          <input id="p-link" type="text" placeholder="Lien Plexus (https://…) ou chemin du fichier" aria-label="Lien ou chemin du fichier dans Plexus">
+          <div class="actions" style="margin-top:10px"><button class="btn pri sm" id="p-add" type="button">Ajouter la pièce</button><span class="msg" id="p-msg" role="status"></span></div>
+        </div>
+        <div class="hint" id="p-ro" hidden>L'ajout de pièces est réservé aux éditeurs de la page.</div>
+        <span class="msg" id="p-msg2" role="status"></span>
+      </div>
+
+      <div class="sec" id="s-jour">
+        <h3>Journal et échanges</h3>
+        <textarea id="j-text" placeholder="Note de suivi, échange avec la CPAM ou l'ARS, décision prise…"></textarea>
+        <div class="actions" style="margin-top:8px"><button class="btn sm" id="j-add" type="button">Ajouter au journal</button><span class="msg" id="j-msg" role="status"></span></div>
+        <ul class="jl" id="j-list"></ul>
+      </div>
+    </div>
+    <div class="dfoot">
+      <button class="btn pri" id="i-save" type="button">Enregistrer</button>
+      <span class="msg" id="i-msg" role="status"></span>
+      <span style="flex:1"></span>
+      <button class="btn sm danger" id="i-del" type="button" hidden>Supprimer cet indicateur</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+(async function(){
+  var $=function(id){return document.getElementById(id)};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+  var nf=new Intl.NumberFormat('fr-FR',{maximumFractionDigits:2});
+  var ST={atteint:'Atteint',bonne_voie:'En bonne voie',surveiller:'À surveiller',completer:'À compléter',sans_mesure:'Sans mesure'};
+  var ST_HINT={atteint:'Objectif atteint et justifié.',bonne_voie:'Résultat partiel ou en progression vers l\'objectif.',surveiller:'Résultat à confirmer ou en retard : à suivre de près.',completer:'Pas encore de résultat ni de pièce : il reste à renseigner.',sans_mesure:'Indicateur de suivi calculé par l\'Assurance Maladie : rien à produire.'};
+  var LEG={partiel:'bonne_voie',a_confirmer:'surveiller',non_atteint:'surveiller',non_documente:'completer',suivi_cpam:'sans_mesure'};
+  var MISS={m1:{nom:'Accès aux soins',kind:'Mission obligatoire'},m2:{nom:'Parcours pluriprofessionnels',kind:'Mission obligatoire'},m3:{nom:'Prévention',kind:'Mission obligatoire'},m4:{nom:'Autre mission',kind:'Mission complémentaire'},m5:{nom:'Qualité et pertinence des soins',kind:'Mission complémentaire'},m6:{nom:'Accompagnement des professionnels',kind:'Mission complémentaire'}};
+  var IND=[],PIECES=[],JOUR=[],names={};
+  var F={mission:'',niveau:'',fv:false,np:false,q:'',statut:'',view:'cartes'};
+  var OPEN=null,CUR_ST='completer',NEWMODE=false;
+  var db=null,downloads=null,userCap=null,uid=null,canWrite=true;
+  /* ---------- lien avec le dossier Plexus « Bilan annuel 2026-2027 » ---------- */
+  var PLX='https://cptsartoislys-cloud.plexus-sante.fr/apps/files/?dir=',PLX_ROOT='/Projets/Bilan annuel 2026-2027';
+  var PLX_M=[[15,25,'1 - Accès aux soins'],[26,34,'2 - Soins non programmés'],[35,42,'3 - Parcours de soins'],[43,52,'4 - Prévention'],[53,60,'5 - Amélioration de la qualité et de la pertinence des soins'],[61,65,'6 - Accompagnement des professionnels de santé']];
+  var PLX_S={22:'A',23:'B',24:'C',25:'C',36:'A',37:'B',38:'C',39:'D',40:'E',41:'F',42:'G',44:'A',45:'B',46:'B',47:'C',48:'C',49:'D',50:'D',51:'E',52:'F',54:'A',55:'B',56:'C',57:'D',58:'E',59:'E',60:'E',62:'A',63:'B',64:'C',65:'D'};
+  function plxUrl(path){return PLX+encodeURIComponent(path)}
+  function plxFolder(r){var n=Number(r.ligne);if(isNaN(n))return null;var m=null;PLX_M.forEach(function(x){if(n>=x[0]&&n<=x[1])m=x[2]});if(!m)return null;var sub=PLX_S[n];return {path:PLX_ROOT+'/'+m+(sub?'/'+sub:''),label:m+(sub?' / '+sub:'')}}
+  $('plx-root').href=plxUrl(PLX_ROOT);
+
+  var CFG=window.PILOTAGE_CONFIG||{dataRepo:'',branch:'main'};
+  var TOK=null;try{TOK=localStorage.getItem('pilotage_gh_token')}catch(e){}
+  var GHU=null,PIDX=null,MANUAL=[];
+  var savedEl=$('saved');
+  function setSaved(kind,text){savedEl.className='saved'+(kind?' '+kind:'');savedEl.lastChild.textContent=text}
+  function idleState(){setSaved(canWrite?'':'ro',canWrite?'Enregistré':'Lecture seule')}
+  $('btn-sync').href='https://github.com/'+CFG.dataRepo+'/actions/workflows/sync.yml';
+
+  function showLogin(msg){
+    setSaved('err','Non connecté');
+    $('main').innerHTML='<div class="empty" style="max-width:600px;margin:36px auto;text-align:left"><h3 style="margin:0 0 8px">Connexion au dépôt de données</h3>'
+      +'<p style="margin:0 0 10px">La consultation est ouverte à tous. Pour modifier le suivi, collez votre jeton d’accès personnel GitHub (fine-grained token, accès <b>Contents : lecture et écriture</b> limité au dépôt <code>'+esc(CFG.dataRepo)+'</code>). Il reste dans ce navigateur uniquement. Cette page est publique : ne saisissez aucun nom de personne.</p>'
+      +'<input id="tk" type="password" autocomplete="off" placeholder="github_pat_…" style="width:100%;padding:10px;border:1px solid var(--line,#ccc);border-radius:8px"><div class="actions" style="margin-top:10px"><button class="btn pri" id="tk-ok" type="button">Se connecter</button><button class="btn sm" id="tk-no" type="button" style="margin-left:8px">Retour à la consultation</button><span class="msg" id="tk-msg" role="status">'+esc(msg||'')+'</span></div></div>';
+    $('tk-no').addEventListener('click',function(){location.reload()});
+    $('tk-ok').addEventListener('click',async function(){
+      var t=$('tk').value.trim();if(!t)return;$('tk-msg').className='msg';$('tk-msg').textContent='Vérification…';
+      try{
+        var h={'Authorization':'Bearer '+t,'Accept':'application/vnd.github+json'};
+        var ru=await fetch('https://api.github.com/user',{headers:h});if(!ru.ok)throw new Error('jeton refusé');
+        var rr=await fetch('https://api.github.com/repos/'+CFG.dataRepo,{headers:h});if(!rr.ok)throw new Error('dépôt introuvable ou accès refusé');
+        localStorage.setItem('pilotage_gh_token',t);location.reload();
+      }catch(e){$('tk-msg').className='msg err';$('tk-msg').textContent=(e&&e.message)||'Connexion impossible'}
+    });
+  }
+  if(!CFG.dataRepo||/OWNER/.test(CFG.dataRepo)){setSaved('err','À configurer');$('main').innerHTML='<div class="empty">Éditez <code>config.js</code> : indiquez le dépôt de données (propriétaire/pilotage-cpts-data).</div>';return}
+  var PUBLIC=!TOK;
+  $('btn-edit').hidden=!PUBLIC;$('btn-edit').addEventListener('click',function(){showLogin()});
+  $('btn-logout').hidden=PUBLIC;$('btn-logout').addEventListener('click',function(){try{localStorage.removeItem('pilotage_gh_token')}catch(e){}location.reload()});
+  var GHH=PUBLIC?{}:{'Authorization':'Bearer '+TOK,'Accept':'application/vnd.github+json'};
+  if(PUBLIC)canWrite=false;
+  if(!PUBLIC)try{
+    var ru0=await fetch('https://api.github.com/user',{headers:GHH});if(!ru0.ok)throw 1;GHU=(await ru0.json()).login;uid=GHU;
+    var rr0=await fetch('https://api.github.com/repos/'+CFG.dataRepo,{headers:GHH});if(!rr0.ok)throw 2;var pj=await rr0.json();canWrite=!!(pj.permissions&&(pj.permissions.push||pj.permissions.admin));
+  }catch(e){try{localStorage.removeItem('pilotage_gh_token')}catch(x){}showLogin('Jeton invalide ou expiré : reconnectez-vous.');return}
+  var GHAPI='https://api.github.com/repos/'+CFG.dataRepo+'/contents/';
+  function b64d(s){var bin=atob(s.replace(/\s/g,'')),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)}
+  function b64e(s){var u=new TextEncoder().encode(s),b='';for(var i=0;i<u.length;i+=8192)b+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(b)}
+  function hsh(t){var h=5381;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'h'+h}
+  async function ghRead(file){if(PUBLIC){var rp=await fetch('data/'+file+'.json?t='+Date.now(),{cache:'no-store'});if(rp.status===404)return {obj:{},sha:null};if(!rp.ok){var ep=new Error('lecture '+rp.status);ep.code=rp.status;throw ep}var tx=await rp.text();return {obj:JSON.parse(tx),sha:hsh(tx)}}
+  var r=await fetch(GHAPI+'data/'+file+'.json?ref='+encodeURIComponent(CFG.branch)+'&t='+Date.now(),{headers:GHH,cache:'no-store'});if(r.status===404)return {obj:{},sha:null};if(!r.ok){var e=new Error('lecture '+r.status);e.code=r.status;throw e}var j=await r.json();return {obj:JSON.parse(b64d(j.content)),sha:j.sha}}
+  var FILES={},SHA={},LIS={};
+  function snap(name,ord){var o=FILES[name]||{};var docs=Object.keys(o).map(function(k){return {id:k,data:function(){return o[k]}}});if(ord){docs.sort(function(a,b){var x=a.data()[ord.f]||'',y=b.data()[ord.f]||'';return ord.d==='desc'?(x<y?1:x>y?-1:0):(x<y?-1:x>y?1:0)})}return {docs:docs}}
+  function emit(name){(LIS[name]||[]).forEach(function(l){try{l.cb(snap(name,l.ord))}catch(e){}})}
+  async function ghMutate(name,fn){
+    for(var i=0;i<4;i++){
+      var cur=await ghRead(name),obj=cur.obj;fn(obj);
+      var body={message:'Pilotage : '+name+' ('+(GHU||'form')+')',content:b64e(JSON.stringify(obj,null,1)),branch:CFG.branch};if(cur.sha)body.sha=cur.sha;
+      var r=await fetch(GHAPI+'data/'+name+'.json',{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},GHH),body:JSON.stringify(body)});
+      if(r.ok){var j=await r.json();FILES[name]=obj;SHA[name]=j.content.sha;emit(name);return}
+      if(r.status!==409&&r.status!==422){var e=new Error('écriture '+r.status);e.code=r.status;throw e}
+      await new Promise(function(ok){setTimeout(ok,400+Math.random()*600)});
+    }
+    var e2=new Error('conflit');e2.code='conflit';throw e2;
+  }
+  function Coll(name,ord){return {
+    orderBy:function(f,d){return Coll(name,{f:f,d:d})},limit:function(){return this},
+    onSnapshot:function(cb,err){(LIS[name]=LIS[name]||[]).push({cb:cb,ord:ord,err:err});if(FILES[name])cb(snap(name,ord))},
+    add:function(doc){var id='x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);return ghMutate(name,function(o){o[id]=doc}).then(function(){return {id:id}})}}}
+  db={collection:function(n){return Coll(n)},doc:function(p){var a=p.split('/');return {
+    set:function(d){return ghMutate(a[0],function(o){o[a[1]]=d})},
+    update:function(d){return ghMutate(a[0],function(o){o[a[1]]=Object.assign({},o[a[1]]||{},d)})},
+    delete:function(){return ghMutate(a[0],function(o){delete o[a[1]]})}}}};
+  downloads={save:function(o){var b=new Blob([o.data],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=o.filename;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);return Promise.resolve()}};
+  async function pollAll(first){
+    var errs=null;
+    for(var n of ['indicateurs','pieces','journal','plexus-index']){
+      try{var c=await ghRead(n);if(first||SHA[n]!==c.sha){SHA[n]=c.sha;FILES[n]=c.obj;if(n==='plexus-index'){PIDX=c.obj;rebuildPieces()}else emit(n)}}
+      catch(e){errs=e;(LIS[n]||[]).forEach(function(l){l.err&&l.err(e)})}
+    }
+    return errs;
+  }
+  if(!canWrite){$('btn-new').hidden=true}
+  idleState();
+
+  /* ---------- pièces : saisies à la main + fichiers synchronisés depuis Plexus ---------- */
+  function rebuildPieces(){
+    var out=MANUAL.slice();
+    if(PIDX&&PIDX.folders){
+      var nF=0;
+      PIDX.folders.forEach(function(fo){var c=fo.count||(fo.files||[]).length;nF+=c;if(!c)return;
+        (fo.lignes||[]).forEach(function(l){
+          out.push({id:'plx:'+fo.path+'#'+l,ligne:String(l),nature:'Plexus',libelle:c+' fichier'+(c>1?'s':'')+' dans le dossier Plexus « '+fo.label+' »',nom:fo.label,lien:fo.url||plxUrl(PLX_ROOT+'/'+fo.path),at:fo.mtime,auto:true,dossier:fo.label})})});
+      var orph=(PIDX.orphans||[]);
+      var st=$('syncst');st.className='saved'+(orph.length?' err':'');
+      st.lastChild.textContent='Plexus : '+nF+' fichier'+(nF>1?'s':'')+(PIDX.generatedAt?' · '+fmtDate(PIDX.generatedAt):'')+(orph.length?' · '+orph.length+' dossier'+(orph.length>1?'s':'')+' sans ligne':'');
+      st.title=orph.length?('Dossiers Plexus contenant des fichiers non rattachés à une ligne : '+orph.map(function(o){return o.label+' ('+o.files+')'}).join(' ; ')):'Tous les fichiers du dossier Plexus sont rattachés à une ligne.';
+    }
+    PIECES=out;render();
+  }
+
+  /* ---------- règles métier ---------- */
+  function norm(o){var s=LEG[o.statut]||o.statut;o.statut=ST[s]?s:'completer';return o}
+  function isFv(r){return r.fv!==undefined?!!r.fv:r.type==='Résultats'}
+  function mcolor(a){return 'var(--'+(MISS[a]?a:'m1')+')'}
+  function nPieces(l){var n=0;for(var i=0;i<PIECES.length;i++)if(String(PIECES[i].ligne)===String(l))n++;return n}
+  function measured(r){return r.statut!=='sans_mesure'}
+  /* une pièce n'est attendue que pour un indicateur local à financement variable : le taux fourni par la CPAM et les indicateurs de suivi n'en demandent pas */
+  function needsPiece(r){return measured(r)&&isFv(r)&&r.niveau!=='National'}
+  function noPieceWhy(r){return r.niveau==='National'?'Résultat calculé par l\'Assurance Maladie : aucune pièce à fournir.':'Indicateur de suivi : aucune pièce à fournir.'}
+  function emptyRes(r){return !r.resultat||/^aucun/i.test(r.resultat)}
+  function ordKey(r){var n=Number(r.ligne);return isNaN(n)?100000+(parseInt(String(r.ligne).replace(/\D/g,''),10)||0):n}
+  function missions(){var m={};IND.forEach(function(r){(m[r.axe_id]=m[r.axe_id]||[]).push(r)});return Object.keys(m).sort().map(function(k){return {id:k,rows:m[k]}})}
+  function stats(rows){var c={atteint:0,bonne_voie:0,surveiller:0,completer:0,sans_mesure:0,total:rows.length,eval:0,fv:0,fvAtt:0,withP:0,needP:0,prov:0};
+    rows.forEach(function(r){c[r.statut]++;if(measured(r)){c.eval++;if(!r.verifie)c.prov++}if(needsPiece(r)){c.needP++;if(nPieces(r.ligne)>0)c.withP++}if(isFv(r)){c.fv++;if(r.statut==='atteint')c.fvAtt++}});return c}
+  function pct(a,b){return b?Math.round(100*a/b):0}
+  function fmtDate(iso){if(!iso)return '';var d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+  function filtered(){
+    var q=F.q.trim().toLowerCase();
+    return IND.filter(function(r){
+      if(F.mission&&r.axe_id!==F.mission)return false;
+      if(F.niveau&&(r.niveau==='National'?'National':'Local')!==F.niveau)return false;
+      if(F.fv&&!isFv(r))return false;
+      if(F.np&&(!needsPiece(r)||nPieces(r.ligne)>0))return false;
+      if(F.statut&&r.statut!==F.statut)return false;
+      if(q&&(r.indicateur+' '+(r.sous_axe||'')+' '+r.ligne+' '+(r.resultat||'')+' '+(r.note||'')+' '+(r.objectif||'')).toLowerCase().indexOf(q)<0)return false;
+      return true});
+  }
+
+  /* ---------- rendu ---------- */
+  function renderTabs(){
+    var M=missions(),c=stats(IND);
+    var h='<button type="button" class="tab'+(F.mission?'':' on')+'" data-mission=""><span>Toutes les missions</span><span class="n">'+c.total+'</span></button>';
+    M.forEach(function(m){var s=stats(m.rows),meta=MISS[m.id]||{nom:m.id};
+      h+='<button type="button" class="tab'+(F.mission===m.id?' on':'')+'" data-mission="'+esc(m.id)+'" style="--mc:'+mcolor(m.id)+'"><span class="dot"></span><span>'+esc(meta.nom)+'</span><span class="n">'+s.atteint+'/'+s.total+'</span></button>'});
+    $('tabs').innerHTML=h;
+    var lo=IND.filter(function(r){return r.niveau!=='National'}).length,na=IND.length-lo;
+    $('seg-niveau').innerHTML=[['','Tous',IND.length],['Local','Locaux (CPTS)',lo],['National','Nationaux (CPAM)',na]].map(function(x){return '<button type="button" data-niveau="'+x[0]+'" class="'+(F.niveau===x[0]?'on':'')+'">'+x[1]+'<span class="n">'+x[2]+'</span></button>'}).join('');
+  }
+  function renderSummary(){
+    var rows=F.mission?IND.filter(function(r){return r.axe_id===F.mission}):IND,c=stats(rows);
+    if(!rows.length){$('sum').innerHTML='<div class="empty" style="grid-column:1/-1;box-shadow:none">Aucun indicateur dans la base. Le référentiel de l\'annexe 1 doit être chargé une première fois.</div>';return}
+    var p=pct(c.atteint,c.eval),C=2*Math.PI*40;
+    var facts='<div><b>'+c.atteint+' sur '+c.eval+'</b> indicateurs évalués atteints</div>';
+    if(c.fv!==c.eval)facts+='<div><b>'+c.fvAtt+' sur '+c.fv+'</b> à financement variable atteints</div>';
+    facts+='<div><b>'+c.withP+' sur '+c.needP+'</b> pièces justificatives attendues référencées</div>';
+    var tl=[['atteint','var(--st-atteint)'],['bonne_voie','var(--st-voie)'],['surveiller','var(--st-surv)'],['completer','var(--st-compl)']];
+    var tiles=tl.map(function(t){return '<button type="button" class="tile'+(F.statut===t[0]?' on':'')+'" data-statut="'+t[0]+'"><b>'+c[t[0]]+'</b><span><i style="background:'+t[1]+'"></i>'+ST[t[0]]+'</span></button>'}).join('');
+    var note=[];
+    if(c.sans_mesure)note.push(c.sans_mesure+' indicateur'+(c.sans_mesure>1?'s':'')+' de suivi calculé'+(c.sans_mesure>1?'s':'')+' par l\'Assurance Maladie (sans mesure par la CPTS).');
+    if(c.prov)note.push(c.prov+' statut'+(c.prov>1?'s':'')+' à valider.');
+    $('sum').innerHTML='<div class="ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent-soft)" stroke-width="12"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+(C*p/100).toFixed(1)+' '+C.toFixed(1)+'"/></svg><b>'+p+' %</b></div>'
+      +'<div class="facts">'+facts+'</div><div class="tiles">'+tiles+'</div>'+(note.length?'<div class="note-sm">'+note.join(' ')+'</div>':'');
+  }
+  function mainVal(r){
+    if(!emptyRes(r)){var t=r.resultat;return '<div class="val'+(t.length>14?' txt':'')+'">'+esc(t)+'</div>'}
+    if(typeof r.valeur==='number')return '<div class="val">'+nf.format(r.valeur)+'</div>';
+    return '<div class="val none">–</div>';
+  }
+  function cardHtml(r){
+    var n=nPieces(r.ligne),h='',pb='';
+    if(typeof r.valeur==='number'&&typeof r.cible==='number'&&r.cible>0)pb='<div class="pbar" title="'+Math.min(100,Math.round(100*r.valeur/r.cible))+' % de la cible"><i style="width:'+Math.min(100,Math.round(100*r.valeur/r.cible))+'%"></i></div>';
+    var tags='<span class="tag">'+(r.niveau==='National'?'National':'Local')+'</span>'+(isFv(r)?'<span class="tag fv">Financement variable</span>':'')
+      +(needsPiece(r)?(n?'<span class="tag ok">'+n+' pièce'+(n>1?'s':'')+'</span>':'<span class="tag todo">Pièce à fournir</span>'):(n?'<span class="tag ok">'+n+' pièce'+(n>1?'s':'')+'</span>':''))
+      +(needsPiece(r)&&r.justificatif==='Oui'?'<span class="tag cite">Cité dans Plexus</span>':'')
+      ;
+    return '<article class="card" tabindex="0" data-open="'+esc(r.ligne)+'" data-card="'+esc(r.ligne)+'" style="--mc:'+mcolor(r.axe_id)+'"><div class="ct"><h4>'+esc(r.indicateur)+'</h4><span class="badge b-'+r.statut+'">'+ST[r.statut]+'</span></div>'
+      +'<div class="tags">'+tags+'</div>'+mainVal(r)+'<div class="obj">'+(r.statut==='sans_mesure'?'Calculé par l\'Assurance Maladie, rien à produire':'Objectif '+esc(r.objectif||'—'))+'</div>'+pb
+      +'<div class="cf"><span'+((measured(r)&&!r.verifie)?' class="prov-t" title="Statut proposé à partir du dossier, pas encore confirmé"':'')+'>'+((measured(r)&&!r.verifie)?'Statut à valider':(r.maj?'Mis à jour le '+fmtDate(r.maj):'Ligne '+esc(r.ligne)))+'</span>'+(function(){var f=plxFolder(r);return f&&needsPiece(r)?'<a href="'+esc(plxUrl(f.path))+'" target="_blank" rel="noopener" title="'+esc(f.label)+'">Dossier Plexus ↗</a>':''})()+(canWrite&&needsPiece(r)?'<button type="button" class="btn sm" data-open="'+esc(r.ligne)+'" data-focus="pieces">Ajouter une pièce</button>':'')+'</div></article>';
+  }
+  function renderMain(){
+    var rows=filtered(),box=$('main');
+    renderActive();
+    if(!IND.length){box.innerHTML='<div class="empty">Aucun indicateur dans la base. Le référentiel de l\'annexe 1 doit être chargé une première fois.</div>';return}
+    if(!rows.length){box.innerHTML='<div class="empty">Aucun indicateur ne correspond à ces filtres.</div>';return}
+    if(F.view==='tableau'){
+      var h='<div class="tbox"><table><thead><tr><th>Ligne</th><th>Indicateur</th><th>Objectif</th><th>Résultat</th><th>Statut</th><th>Pièces</th><th>Mise à jour</th></tr></thead><tbody>',last='';
+      rows.forEach(function(r){
+        if(r.axe_id!==last){last=r.axe_id;h+='<tr class="gr"><td colspan="7" style="border-left:5px solid '+mcolor(last)+'">'+esc((MISS[last]||{}).nom||last)+'</td></tr>'}
+        var n=nPieces(r.ligne);
+        h+='<tr class="row" tabindex="0" data-open="'+esc(r.ligne)+'"><td class="ref">L'+esc(r.ligne)+'</td><td>'+esc(r.indicateur)+(isFv(r)?' <span class="tag fv">Fin. variable</span>':'')+'</td><td>'+esc(r.objectif||'')+'</td><td>'+esc(emptyRes(r)?'–':r.resultat)+'</td><td><span class="badge b-'+r.statut+'">'+ST[r.statut]+'</span></td><td>'+(needsPiece(r)?(n?n+' déposée'+(n>1?'s':''):'<span class="tag todo">À fournir</span>'):(n?n+' déposée'+(n>1?'s':''):'—'))+'</td><td>'+fmtDate(r.maj)+'</td></tr>'});
+      box.innerHTML=h+'</tbody></table></div>';return;
+    }
+    var out='',byM={};rows.forEach(function(r){(byM[r.axe_id]=byM[r.axe_id]||[]).push(r)});
+    Object.keys(byM).sort().forEach(function(m){
+      var meta=MISS[m]||{nom:m,kind:''},all=IND.filter(function(r){return r.axe_id===m}).length;
+      out+='<section style="--mc:'+mcolor(m)+'"><div class="mh"><h2>'+esc(meta.nom)+'</h2><span>'+esc(meta.kind)+' · '+all+' indicateur'+(all>1?'s':'')+(byM[m].length!==all?' ('+byM[m].length+' affiché'+(byM[m].length>1?'s':'')+')':'')+'</span></div>';
+      var sub='',buf='';
+      byM[m].forEach(function(r){var s=r.sous_axe||'Autres';if(s!==sub){if(buf)out+='<div class="grid">'+buf+'</div>';buf='';sub=s;out+='<div class="sub">'+esc(s)+'</div>'}buf+=cardHtml(r)});
+      if(buf)out+='<div class="grid">'+buf+'</div>';out+='</section>';
+    });
+    box.innerHTML=out;
+  }
+  function renderActive(){
+    var h='';if(F.statut)h+='<button type="button" class="activef" data-clear="statut">'+esc(ST[F.statut])+' ×</button>';
+    $('activef').innerHTML=h;
+  }
+  var pend=false;
+  function render(){if(pend)return;pend=true;requestAnimationFrame(function(){pend=false;renderTabs();renderSummary();renderMain();if(OPEN&&!NEWMODE)refreshLists()})}
+
+  /* ---------- noms ---------- */
+  async function resolveNames(ids){
+    return;var need=[];ids.forEach(function(i){if(i&&!(i in names)&&need.indexOf(i)<0)need.push(i)});if(!need.length)return;
+    try{var ps=await userCap.profiles(need);need.forEach(function(i){names[i]=(ps[i]&&ps[i].name)||'Un membre'})}catch(e){need.forEach(function(i){names[i]='Un membre'})}
+    if(OPEN&&!NEWMODE)refreshLists();
+  }
+  function who(i){return i?(i===uid?'Vous':i):'CPTS Artois Lys'}
+
+  /* ---------- tiroir ---------- */
+  function rowOf(l){for(var i=0;i<IND.length;i++)if(String(IND[i].ligne)===String(l))return IND[i];return null}
+  function setChips(s){
+    CUR_ST=s;
+    $('chips').innerHTML=['atteint','bonne_voie','surveiller','completer','sans_mesure'].map(function(k){return '<button type="button" class="chip c-'+k+'" data-chip="'+k+'" aria-pressed="'+(k===s)+'"'+(canWrite?'':' disabled')+'><i></i>'+ST[k]+'</button>'}).join('');
+    $('chip-hint').textContent=ST_HINT[s];
+  }
+  function ctlDisable(){['i-valeur','i-cible','i-resultat','i-note','i-just','i-verifie','j-text','j-add','i-save','n-titre','n-axe','n-niveau','n-sous','n-obj','n-fv'].forEach(function(id){$(id).disabled=!canWrite})}
+  function clearPend(){try{$('p-file').value=''}catch(e){}$('p-link').value='';$('p-label').value='';$('p-msg').textContent=''}
+  function openDrawer(l,opts){
+    opts=opts||{};NEWMODE=(l==='+new');OPEN=String(l);clearPend();
+    var r=NEWMODE?null:rowOf(l);if(!NEWMODE&&!r){OPEN=null;return}
+    $('s-new').hidden=!NEWMODE;$('s-pieces').hidden=NEWMODE;$('s-jour').hidden=NEWMODE;$('i-just').closest('label').hidden=false;
+    $('i-msg').textContent='';$('i-msg').className='msg';$('j-msg').textContent='';$('j-text').value='';
+    if(NEWMODE){
+      $('d-k').textContent='Ajouter un indicateur';$('d-title').textContent='Nouvel indicateur';$('d-tags').innerHTML='';$('drawer').style.setProperty('--mc','var(--accent)');
+      $('n-axe').innerHTML=Object.keys(MISS).map(function(k){return '<option value="'+k+'">'+esc(MISS[k].nom)+'</option>'}).join('');
+      ['n-titre','n-sous','n-obj'].forEach(function(id){$(id).value=''});$('n-fv').checked=true;
+      setChips('completer');['i-valeur','i-cible','i-resultat','i-note'].forEach(function(id){$(id).value=''});$('i-just').checked=false;$('i-verifie').checked=true;$('i-del').hidden=true;
+    }else{
+      $('drawer').style.setProperty('--mc',mcolor(r.axe_id));
+      $('d-k').textContent='Ligne '+r.ligne+' · '+((MISS[r.axe_id]||{}).nom||r.axe)+(r.sous_axe?' · '+r.sous_axe:'');
+      $('d-title').textContent=r.indicateur;
+      $('d-tags').innerHTML='<span class="tag">'+(r.niveau==='National'?'National':'Local')+'</span>'+(isFv(r)?'<span class="tag fv">Financement variable</span>':'')+'<span class="tag cite">Objectif '+esc(r.objectif||'—')+'</span>'+(needsPiece(r)?'':'<span class="tag cite">Aucune pièce attendue</span>')+(function(){var f=plxFolder(r);if(!f)return '';return '<a class="tag plx-l" href="'+esc(plxUrl(f.path))+'" target="_blank" rel="noopener" title="'+esc(f.label)+'">Dossier Plexus : '+esc(f.label)+' ↗</a>'})();
+      setChips(r.statut);
+      $('i-valeur').value=typeof r.valeur==='number'?r.valeur:'';$('i-cible').value=typeof r.cible==='number'?r.cible:'';
+      $('i-resultat').value=emptyRes(r)?'':r.resultat;$('i-note').value=r.note||'';$('i-just').checked=r.justificatif==='Oui';$('i-verifie').checked=!!r.verifie;
+      $('i-del').hidden=!(canWrite&&/^P/.test(String(r.ligne)));$('i-del').textContent='Supprimer cet indicateur';
+      var np=needsPiece(r),has=nPieces(r.ligne)>0;
+      $('s-pieces').hidden=!(np||has);$('i-just').closest('label').hidden=!np;
+      $('p-up').hidden=!(np&&canWrite);$('p-ro').hidden=!(np&&!canWrite);
+      if(!np&&has){$('p-ro').hidden=false;$('p-ro').textContent=noPieceWhy(r)+' Les pièces déjà déposées restent consultables.'}else $('p-ro').textContent='La référence de pièces est réservée aux éditeurs de la page.';
+      var pf=plxFolder(r);$('p-plx').hidden=!(pf&&(np||has));if(pf)$('p-plx-a').href=plxUrl(pf.path);
+      refreshLists();
+    }
+    ctlDisable();if(!canWrite){$('i-msg').textContent='Consultation publique : les modifications sont réservées aux éditeurs.'}
+    $('overlay').hidden=false;document.body.style.overflow='hidden';
+    if(opts.focus==='pieces'){setTimeout(function(){$('s-pieces').scrollIntoView({block:'start'})},30)}else{$('drawer').querySelector('.dbody').scrollTop=0}
+    $('d-close').focus({preventScroll:true});
+  }
+  function closeDrawer(){OPEN=null;NEWMODE=false;$('overlay').hidden=true;document.body.style.overflow=''}
+  function refreshLists(){
+    var l=OPEN;if(!l||NEWMODE)return;
+    var ps=PIECES.filter(function(p){return String(p.ligne)===l}).sort(function(a,b){return (b.at||'')<(a.at||'')?-1:1});
+    $('p-count').textContent=ps.length?ps.length+' référencée'+(ps.length>1?'s':''):'';
+    $('p-list').innerHTML=ps.length?ps.map(function(p){
+      var ttl=esc(p.libelle||p.nom||'Pièce'),isUrl=/^https:\/\//.test(p.lien||''),host='';try{host=isUrl?new URL(p.lien).hostname:''}catch(e){}
+      return '<li><div class="thumb">'+(isUrl?'LIEN':'FIC')+'</div><div class="pi">'+(isUrl?'<a href="'+esc(p.lien)+'" target="_blank" rel="noopener">'+ttl+'</a>':'<strong>'+ttl+'</strong>')+'<span class="meta">'+esc(p.nature||'')+' · '+(p.auto?esc(p.dossier||'Plexus'):(isUrl?esc(host):esc(p.chemin||'')))+' · '+fmtDate(p.at)+' · '+(p.auto?'synchronisé depuis Plexus':esc(who(p.by)))+'</span></div>'+(canWrite&&!p.auto?'<button type="button" class="btn sm danger" data-del="'+esc(p.id)+'">Retirer</button>':'')+'</li>'}).join(''):'<li style="border-style:dashed;color:var(--ink-2)">Aucune pièce référencée sur cette ligne.</li>';
+    var js=JOUR.filter(function(j){return String(j.ligne)===l});
+    $('j-list').innerHTML=js.length?js.map(function(j){return '<li class="'+esc(j.kind||'')+'"><div>'+esc(j.texte)+'</div><div class="meta">'+fmtDate(j.at)+' · '+esc(who(j.by))+'</div></li>'}).join(''):'<li style="color:var(--ink-2)">Aucune entrée pour le moment.</li>';
+    resolveNames(ps.map(function(p){return p.by}).concat(js.map(function(j){return j.by})));
+  }
+  function logEntry(l,kind,texte){return db.collection('journal').add({ligne:String(l),kind:kind,texte:texte,at:new Date().toISOString(),by:uid})}
+  async function wrapSave(fn){setSaved('busy','Enregistrement…');try{await fn();idleState();return true}catch(e){setSaved('err','Erreur d\'enregistrement');throw e}}
+
+  async function saveInd(){
+    var msg=$('i-msg');msg.className='msg';
+    var vv=$('i-valeur').value.trim(),cc=$('i-cible').value.trim();
+    var common={statut:CUR_ST,justificatif:CUR_ST==='sans_mesure'?'Sans objet':($('i-just').checked?'Oui':'Non'),valeur:vv===''?null:Number(vv),cible:cc===''?null:Number(cc),resultat:$('i-resultat').value.trim(),note:$('i-note').value.trim(),verifie:$('i-verifie').checked,maj:new Date().toISOString(),par:uid};
+    $('i-save').disabled=true;msg.textContent='Enregistrement…';
+    try{
+      if(NEWMODE){
+        var titre=$('n-titre').value.trim();if(!titre){msg.className='msg err';msg.textContent='Donnez un intitulé à l\'indicateur.';$('i-save').disabled=false;return}
+        var nPerso=IND.filter(function(r){return /^P/.test(String(r.ligne))}).length+1,ligne='P'+nPerso,axe=$('n-axe').value,id='p'+Date.now().toString(36);
+        var doc=Object.assign({ligne:ligne,axe_id:axe,axe:MISS[axe].nom,sous_axe:$('n-sous').value.trim()||'Indicateurs ajoutés',indicateur:titre,niveau:$('n-niveau').value,type:$('n-fv').checked?'Résultats':'Suivi',fv:$('n-fv').checked,objectif:$('n-obj').value.trim()||'À définir'},common);
+        await wrapSave(function(){return db.doc('indicateurs/'+id).set(doc)});
+        await logEntry(ligne,'suivi','Indicateur ajouté à la main.');
+        msg.className='msg good';msg.textContent='Indicateur ajouté.';
+        setTimeout(function(){closeDrawer()},500);
+      }else{
+        var r=rowOf(OPEN);if(!r)return;
+        var ch=[];
+        if(common.statut!==r.statut)ch.push('statut : '+ST[r.statut]+' → '+ST[common.statut]);
+        if((common.resultat||'')!==(emptyRes(r)?'':r.resultat))ch.push('résultat : '+(common.resultat||'(vide)'));
+        if(common.valeur!==(r.valeur==null?null:r.valeur)||common.cible!==(r.cible==null?null:r.cible))ch.push('valeur '+(common.valeur==null?'—':common.valeur)+' / cible '+(common.cible==null?'—':common.cible));
+        if(common.verifie!==!!r.verifie)ch.push(common.verifie?'statut vérifié':'statut remis à valider');
+        await wrapSave(function(){return db.doc('indicateurs/'+(r._id||('l'+r.ligne))).update(Object.assign({statut:common.statut},common))});
+        if(ch.length)await logEntry(r.ligne,'suivi','Mise à jour — '+ch.join(' ; '));
+        msg.className='msg good';msg.textContent='Enregistré.';
+      }
+    }catch(e){msg.className='msg err';msg.textContent='Enregistrement refusé ('+(e&&e.code||'erreur')+'). Vérifiez vos droits sur la page.'}
+    $('i-save').disabled=!canWrite;
+  }
+  var delInd=false;
+  async function deleteInd(){
+    var r=rowOf(OPEN);if(!r||!/^P/.test(String(r.ligne)))return;
+    if(!delInd){delInd=true;$('i-del').textContent='Confirmer la suppression';return}
+    delInd=false;
+    try{await wrapSave(function(){return db.doc('indicateurs/'+r._id).delete()});closeDrawer()}catch(e){$('i-msg').className='msg err';$('i-msg').textContent='Suppression refusée.'}
+  }
+
+  /* ---------- pièces ---------- */
+  async function addPiece(){
+    var m=$('p-msg'),raw=$('p-link').value.trim(),lab=$('p-label').value.trim(),nat=$('p-type').value,l=OPEN;m.className='msg';
+    if(!raw){m.className='msg err';m.textContent='Collez le lien Plexus du fichier.';return}
+    var doc={ligne:l,nature:nat,libelle:lab,at:new Date().toISOString(),by:uid};
+    if(/^[a-z][a-z0-9+.-]*:/i.test(raw)){
+      var u;try{u=new URL(raw)}catch(e){u=null}
+      if(!u||u.protocol!=='https:'){m.className='msg err';m.textContent='Le lien doit commencer par https://';return}
+      doc.lien=u.href;doc.nom=decodeURIComponent((u.pathname.split('/').filter(Boolean).pop()||u.hostname));
+      if(!/plexus-sante\.fr$/i.test(u.hostname)){m.className='msg err';m.textContent='Ce lien ne vient pas de Plexus Santé ('+u.hostname+'). Ajoutez-le seulement si c\'est voulu : cliquez de nouveau.';if(addPiece._ok!==raw){addPiece._ok=raw;return}}
+    }else{doc.chemin=raw;doc.nom=raw.split('/').filter(Boolean).pop()||raw}
+    $('p-add').disabled=true;
+    try{
+      await wrapSave(function(){return db.collection('pieces').add(doc)});
+      await logEntry(l,'piece','Pièce référencée dans Plexus : '+(lab||doc.nom)+' ('+nat+')');
+      clearPend();m.className='msg good';m.textContent='Pièce ajoutée.';
+    }catch(e){m.className='msg err';m.textContent='Ajout refusé ('+(e&&e.code||'erreur')+').'}
+    $('p-add').disabled=false;
+  }
+  function readB64(f){return new Promise(function(ok,ko){var r=new FileReader();r.onload=function(){ok(String(r.result).split(',')[1])};r.onerror=ko;r.readAsDataURL(f)})}
+  async function ghPutFile(path,b64,msg){
+    for(var i=0;i<3;i++){var r=await fetch(GHAPI+path,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},GHH),body:JSON.stringify({message:msg,content:b64,branch:CFG.branch})});
+      if(r.ok)return true;if(r.status!==409&&r.status!==422){var e=new Error('dépôt '+r.status);e.code=r.status;throw e}await new Promise(function(ok){setTimeout(ok,500)})}
+    throw new Error('conflit')}
+  async function uploadFiles(fl,lab,nat,l,m){
+    $('p-add').disabled=true;var okN=0;
+    for(var i=0;i<fl.length;i++){
+      var f=fl[i];
+      if(f.size>25*1024*1024){m.className='msg err';m.textContent=f.name+' dépasse 25 Mo : déposez-le directement dans Plexus.';continue}
+      m.className='msg';m.textContent='Envoi de '+f.name+'…';
+      try{
+        var ts=Date.now().toString(36)+i,safe=f.name.replace(/[^A-Za-z0-9._()\- àâäçéèêëîïôöùûüÀÉÈ]+/g,'_'),key=ts+'__'+safe,dir='uploads/'+String(l).replace(/[^A-Za-z0-9_-]/g,'_')+'/';
+        await ghPutFile(dir+key,await readB64(f),'Dépôt '+f.name+' (ligne '+l+')');
+        var meta={id:'up_'+ts,ligne:String(l),nature:nat,libelle:lab||f.name,nom:f.name,by:GHU,at:new Date().toISOString()};
+        await ghPutFile(dir+key+'.json',b64e(JSON.stringify(meta,null,1)),'Métadonnées '+f.name);
+        await ghMutate('pieces',function(o){o[meta.id]={ligne:meta.ligne,nature:nat,libelle:(lab||f.name)+' (dépôt vers Plexus en cours)',nom:f.name,attente:true,at:meta.at,by:GHU}});
+        await logEntry(l,'piece','Fichier déposé depuis le formulaire : '+(lab||f.name)+' ('+nat+'), versement dans Plexus en cours');
+        okN++;
+      }catch(e){m.className='msg err';m.textContent='Dépôt refusé pour '+f.name+' ('+(e&&e.code||'erreur')+').'}
+    }
+    if(okN){clearPend();$('p-file').value='';m.className='msg good';m.textContent=okN+' fichier'+(okN>1?'s':'')+' déposé'+(okN>1?'s':'')+' : versement dans Plexus dans quelques minutes.'}
+    $('p-add').disabled=false;
+  }
+  var delArm=null;
+  async function delPiece(btn){
+    var id=btn.getAttribute('data-del');
+    if(delArm!==id){delArm=id;btn.textContent='Confirmer';return}
+    delArm=null;var p=PIECES.filter(function(x){return x.id===id})[0];if(!p)return;
+    try{await wrapSave(function(){return db.doc('pieces/'+id).delete()});await logEntry(p.ligne,'piece','Pièce retirée : '+(p.libelle||p.nom))}
+    catch(e){$('p-msg2').className='msg err';$('p-msg2').textContent='Suppression refusée.'}
+  }
+  async function addNote(){
+    var t=$('j-text').value.trim(),m=$('j-msg');if(!t){m.className='msg err';m.textContent='Écrivez une note avant d\'ajouter.';return}
+    try{await wrapSave(function(){return logEntry(OPEN,'note',t)});$('j-text').value='';m.className='msg good';m.textContent='Ajouté.'}catch(e){m.className='msg err';m.textContent='Ajout refusé.'}
+  }
+  async function exportCsv(){
+    if(!downloads)return;
+    var cols=['ligne','mission','theme','indicateur','niveau','financement_variable','objectif','resultat','statut','valeur','cible','pieces_deposees','cite_dans_plexus','statut_verifie','maj','note'];
+    var q=function(v){v=v==null?'':String(v);return /[";\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+    var L=[cols.join(';')];
+    IND.forEach(function(r){L.push([r.ligne,(MISS[r.axe_id]||{}).nom||r.axe,r.sous_axe,r.indicateur,r.niveau,isFv(r)?'oui':'non',r.objectif,emptyRes(r)?'':r.resultat,ST[r.statut],r.valeur,r.cible,nPieces(r.ligne),r.justificatif==='Oui'?'oui':'non',r.verifie?'oui':'non',fmtDate(r.maj),r.note].map(q).join(';'))});
+    try{await downloads.save({filename:'suivi-indicateurs-ACI-annee5.csv',data:'﻿'+L.join('\r\n')})}catch(e){}
+  }
+
+  /* ---------- événements ---------- */
+  document.addEventListener('click',function(ev){
+    if(ev.target.closest('a[href]'))return;
+    var t=ev.target.closest('[data-del],[data-up],[data-open],[data-mission],[data-niveau],[data-statut],[data-chip],[data-view],[data-clear]');if(!t)return;
+    if(t.hasAttribute('data-del')){delPiece(t);return}
+    if(t.hasAttribute('data-chip')){if(canWrite)setChips(t.getAttribute('data-chip'));return}
+    if(t.hasAttribute('data-open')){openDrawer(t.getAttribute('data-open'),{focus:t.getAttribute('data-focus')});return}
+    if(t.hasAttribute('data-mission')){F.mission=t.getAttribute('data-mission')}
+    else if(t.hasAttribute('data-niveau')){F.niveau=t.getAttribute('data-niveau')}
+    else if(t.hasAttribute('data-statut')){var s=t.getAttribute('data-statut');F.statut=F.statut===s?'':s}
+    else if(t.hasAttribute('data-clear')){F.statut=''}
+    else if(t.hasAttribute('data-view')){F.view=t.getAttribute('data-view');Array.prototype.forEach.call($('seg-view').children,function(b){b.classList.toggle('on',b.getAttribute('data-view')===F.view)})}
+    renderTabs();renderSummary();renderMain();
+  });
+  document.addEventListener('keydown',function(ev){
+    if(ev.key==='Escape'&&OPEN)closeDrawer();
+    if((ev.key==='Enter'||ev.key===' ')&&ev.target.hasAttribute&&ev.target.hasAttribute('data-open')&&ev.target.tagName!=='BUTTON'){ev.preventDefault();openDrawer(ev.target.getAttribute('data-open'))}
+  });
+  $('veil').addEventListener('click',closeDrawer);$('d-close').addEventListener('click',closeDrawer);
+  $('i-save').addEventListener('click',saveInd);$('i-del').addEventListener('click',deleteInd);
+  $('p-add').addEventListener('click',addPiece);$('j-add').addEventListener('click',addNote);$('btn-export').addEventListener('click',exportCsv);
+  $('btn-new').addEventListener('click',function(){openDrawer('+new')});
+  $('c-fv').addEventListener('change',function(e){F.fv=e.target.checked;renderMain()});
+  $('c-np').addEventListener('change',function(e){F.np=e.target.checked;renderMain()});
+  $('q').addEventListener('input',function(e){F.q=e.target.value;renderMain()});
+  window.addEventListener('dragover',function(e){e.preventDefault()});window.addEventListener('drop',function(e){e.preventDefault()});
+
+  /* ---------- abonnements (une seule fois) ---------- */
+  var onErr=function(e){setSaved('err','Lecture impossible ('+(e&&e.code||'erreur')+')')};
+  db.collection('indicateurs').onSnapshot(function(s){IND=s.docs.map(function(d){var o=Object.assign({},d.data());o._id=d.id;return norm(o)}).sort(function(a,b){return ordKey(a)-ordKey(b)});render()},onErr);
+  db.collection('pieces').onSnapshot(function(s){MANUAL=s.docs.map(function(d){var o=Object.assign({},d.data());o.id=d.id;return o});rebuildPieces()},onErr);
+  db.collection('journal').orderBy('at','desc').limit(800).onSnapshot(function(s){JOUR=s.docs.map(function(d){return d.data()});render()},onErr);
+  var firstErr=await pollAll(true);
+  if(firstErr&&firstErr.code===404){setSaved('err','Données introuvables')}
+  setInterval(function(){if(!document.hidden)pollAll(false)},60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)pollAll(false)});
+})();
+</script>
+
+</body></html>
