@@ -201,7 +201,7 @@ td.ref{white-space:nowrap;color:var(--ink-2);font-weight:700}
       <h1>Suivi des indicateurs</h1>
       <div class="st">CPTS Artois Lys · Avenant 3 à l'ACI · objectifs de la 5e année</div>
     </div>
-    <a class="btn pri" id="plx-root" href="#" target="_blank" rel="noopener">Dossier Plexus · Bilan annuel 2026-2027</a>
+    <a class="btn pri" id="plx-root" href="#" target="_blank" rel="noopener">Dossier Plexus · Bilan annuel ACI 2026-2027</a>
     <span class="saved" id="saved" role="status"><i></i><span>Chargement…</span></span>
     <span class="saved" id="syncst" role="status" title=""><i></i><span>Plexus…</span></span>
     <a class="btn sm" id="btn-sync" href="#" target="_blank" rel="noopener" title="Lancer la synchronisation avec Plexus maintenant">Synchroniser</a>
@@ -234,7 +234,7 @@ td.ref{white-space:nowrap;color:var(--ink-2);font-weight:700}
   <main id="main"><div class="empty">Chargement…</div></main>
 
   <div class="foot">
-    <span>Cliquez sur un indicateur pour saisir son résultat et référencer ses pièces justificatives, qui restent stockées dans Plexus Santé. Chaque indicateur renvoie directement au sous-dossier correspondant du projet « Bilan annuel 2026-2027 ».</span>
+    <span>Cliquez sur un indicateur pour saisir son résultat et référencer ses pièces justificatives, qui restent stockées dans Plexus Santé. Chaque indicateur renvoie directement au sous-dossier correspondant du projet « Bilan annuel ACI 2026-2027 ».</span>
     <span>Le partage se règle depuis le menu Partager de la page : une personne en lecture seule voit statuts, liens vers les pièces et journal, sans pouvoir les modifier. Les fichiers eux-mêmes ne s'ouvrent que pour les personnes ayant accès à Plexus.</span>
   </div>
 </div>
@@ -335,8 +335,8 @@ td.ref{white-space:nowrap;color:var(--ink-2);font-weight:700}
   var F={mission:'',niveau:'',fv:false,np:false,q:'',statut:'',view:'cartes'};
   var OPEN=null,CUR_ST='completer',NEWMODE=false;
   var db=null,downloads=null,userCap=null,uid=null,canWrite=true;
-  /* ---------- lien avec le dossier Plexus « Bilan annuel 2026-2027 » ---------- */
-  var PLX='https://cptsartoislys-cloud.plexus-sante.fr/apps/files/?dir=',PLX_ROOT='/Projets/Bilan annuel 2026-2027';
+  /* ---------- lien avec le dossier Plexus « Bilan annuel ACI 2026-2027 » ---------- */
+  var PLX='https://cptsartoislys-cloud.plexus-sante.fr/apps/files/?dir=',PLX_ROOT='/Projets/Bilan annuel ACI 2026-2027';
   var PLX_M=[[15,25,'1 - Accès aux soins'],[26,34,'2 - Soins non programmés'],[35,42,'3 - Parcours de soins'],[43,52,'4 - Prévention'],[53,60,'5 - Amélioration de la qualité et de la pertinence des soins'],[61,65,'6 - Accompagnement des professionnels de santé']];
   var PLX_S={22:'A',23:'B',24:'C',25:'C',36:'A',37:'B',38:'C',39:'D',40:'E',41:'F',42:'G',44:'A',45:'B',46:'B',47:'C',48:'C',49:'D',50:'D',51:'E',52:'F',54:'A',55:'B',56:'C',57:'D',58:'E',59:'E',60:'E',62:'A',63:'B',64:'C',65:'D'};
   function plxUrl(path){return PLX+encodeURIComponent(path)}
