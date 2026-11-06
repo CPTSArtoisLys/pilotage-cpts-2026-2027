@@ -1,6 +1,41 @@
 {
- "generatedAt": "2026-11-01T09:20:28.538Z",
+ "generatedAt": "2026-11-06T22:24:20.711Z",
  "root": "/Projets/Bilan annuel ACI 2026-2027",
- "folders": [],
- "orphans": []
+ "folders": [
+  {
+   "path": "4 - Prévention",
+   "label": "4 - Prévention",
+   "lignes": [],
+   "count": 4,
+   "mtime": "2026-11-06T21:21:42.000Z",
+   "url": "https://cptsartoislys-cloud.plexus-sante.fr/apps/files/?dir=%2FProjets%2FBilan%20annuel%20ACI%202026-2027%2F4%20-%20Pr%C3%A9vention",
+   "h": [
+    "0e04a68aa58f",
+    "5fb3d40cbc56",
+    "7a58ec53f9e1",
+    "c02aaa4c0fdf"
+   ]
+  },
+  {
+   "path": "6 - Accompagnement des professionnels de santé",
+   "label": "6 - Accompagnement des professionnels de santé",
+   "lignes": [],
+   "count": 1,
+   "mtime": "2026-11-06T21:29:26.000Z",
+   "url": "https://cptsartoislys-cloud.plexus-sante.fr/apps/files/?dir=%2FProjets%2FBilan%20annuel%20ACI%202026-2027%2F6%20-%20Accompagnement%20des%20professionnels%20de%20sant%C3%A9",
+   "h": [
+    "8735fc1c09c9"
+   ]
+  }
+ ],
+ "orphans": [
+  {
+   "label": "4 - Prévention",
+   "files": 4
+  },
+  {
+   "label": "6 - Accompagnement des professionnels de santé",
+   "files": 1
+  }
+ ]
 }
